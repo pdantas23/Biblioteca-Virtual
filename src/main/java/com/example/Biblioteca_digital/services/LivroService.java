@@ -1,8 +1,9 @@
 package com.example.Biblioteca_digital.services;
 
+import com.example.Biblioteca_digital.exceptions.DuplicateResourceException;
+import com.example.Biblioteca_digital.exceptions.EventNotFoundException;
 import com.example.Biblioteca_digital.models.LivroModel;
 import com.example.Biblioteca_digital.repositorys.LivroRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,22 +17,42 @@ public class LivroService {
     private LivroRepository livroRepository;
 
     public LivroModel salvarLivro(LivroModel livro){
+        Optional<LivroModel> livroExistente = livroRepository.findByIsbn(livro.getIsbn());
+
+        if(livroExistente.isPresent()){
+            throw new DuplicateResourceException("Livro com ISBN " + livro.getIsbn() + " já cadastrado.");
+        }
+
         return livroRepository.save(livro);
     }
 
     public List<LivroModel> listarLivros(){
-        return livroRepository.findAll();
+
+        List<LivroModel> livros = livroRepository.findAll();
+
+        if(livros.isEmpty()){
+            throw new EventNotFoundException("Nenhum livro cadastrado.");
+        }
+        return livros;
     }
 
     public void deletarLivros(){
+
+        if(livroRepository.findAll().isEmpty()){
+            throw new EventNotFoundException("Nenhum livro cadastrado.");
+        }
+
         livroRepository.deleteAll();
     }
 
-    public Optional<LivroModel> buscarLivroPorId(Long id){
-        return livroRepository.findById(id);
+    public LivroModel buscarLivroPorIsbn(String isbn) {
+        return livroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new EventNotFoundException("Livro com ISBN " + isbn + " não encontrado."));
     }
 
-    public void apagarLivroPorId(Long id){
-        livroRepository.deleteById(id);
+    public void apagarLivroPorIsbn(String isbn) {
+        LivroModel livro = buscarLivroPorIsbn(isbn);
+
+        livroRepository.deleteByIsbn(isbn);
     }
 }

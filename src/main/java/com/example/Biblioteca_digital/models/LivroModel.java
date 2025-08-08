@@ -2,6 +2,7 @@ package com.example.Biblioteca_digital.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ public class LivroModel {
     @Column(unique = false, nullable = false)
     private String anoDePublicacao;
 
-    @NotBlank
+    @NotNull
     @Column(unique = false, nullable = false)
     private String isbn;
 }

@@ -24,7 +24,6 @@ public class LivroController {
     @PostMapping("/cadastro-livros")
     public ResponseEntity<ResponseDTO<LivroModel>> cadastroLivro(@RequestBody @Valid LivroDTO livroDTO) {
         LivroModel livro = new LivroModel();
-
         BeanUtils.copyProperties(livroDTO, livro);
 
         LivroModel salvo = livroService.salvarLivro(livro);
@@ -64,10 +63,10 @@ public class LivroController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseDTO<LivroModel>> buscarLivroPorId(@PathVariable Long id) {
-        LivroModel livro = livroService.buscarLivroPorId(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado!"));
+    @GetMapping("/{isbn}")
+    public ResponseEntity<ResponseDTO<LivroModel>> buscarLivroPorIsbn(@PathVariable String isbn) {
+        LivroModel livro = livroService.buscarLivroPorIsbn(isbn);
+
 
         ResponseDTO<LivroModel> responseDTO = new ResponseDTO<>(
                 LocalDateTime.now(),
@@ -78,12 +77,11 @@ public class LivroController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseDTO<?>> deletarLivroPorId(@PathVariable Long id) {
-        LivroModel livro = livroService.buscarLivroPorId(id)
-                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado!"));
+    @DeleteMapping("/{isbn}")
+    public ResponseEntity<ResponseDTO<?>> deletarLivroPorId(@PathVariable String isbn) {
+        LivroModel livro = livroService.buscarLivroPorIsbn(isbn);
 
-        livroService.apagarLivroPorId(id);
+        livroService.apagarLivroPorIsbn(isbn);
 
         ResponseDTO<LivroModel> responseDTO = new ResponseDTO<>(
                 LocalDateTime.now(),
