@@ -3,7 +3,11 @@ package com.example.Biblioteca_digital.services;
 import com.example.Biblioteca_digital.exceptions.DuplicateResourceException;
 import com.example.Biblioteca_digital.exceptions.EventNotFoundException;
 import com.example.Biblioteca_digital.models.LivroModel;
-import com.example.Biblioteca_digital.repositorys.LivroRepository;
+import com.example.Biblioteca_digital.enums.LivroStatus;
+import com.example.Biblioteca_digital.models.UserModel;
+import com.example.Biblioteca_digital.repositories.LivroRepository;
+import com.example.Biblioteca_digital.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +19,9 @@ public class LivroService {
 
     @Autowired
     private LivroRepository livroRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public LivroModel salvarLivro(LivroModel livro){
         Optional<LivroModel> livroExistente = livroRepository.findByIsbn(livro.getIsbn());
@@ -50,9 +57,35 @@ public class LivroService {
                 .orElseThrow(() -> new EventNotFoundException("Livro com ISBN " + isbn + " não encontrado."));
     }
 
-    public void apagarLivroPorIsbn(String isbn) {
-        LivroModel livro = buscarLivroPorIsbn(isbn);
+    @Transactional
+    public LivroModel apagarLivroPorIsbn(String isbn) {
+        LivroModel livro = livroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new EventNotFoundException("Livro com ISBN " + isbn + " não encontrado."));
 
-        livroRepository.deleteByIsbn(isbn);
+        livroRepository.delete(livro);
+
+        return livro;
+    }
+
+    public LivroModel alugarLivroPorIsbn(String isbn, Long usuarioId) {
+        LivroModel livro = livroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new EventNotFoundException("Livro não encontrado com ISBN: " + isbn));
+
+        if (livro.getStatus() == LivroStatus.ALUGADO) {
+            throw new DuplicateResourceException("Livro já está alugado");
+        }
+
+        UserModel usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new EventNotFoundException("Usuário não encontrado com ID: " + usuarioId));
+
+        livro.setStatus(LivroStatus.ALUGADO);
+        livro.setUsuario(usuario);
+
+        return livroRepository.save(livro);
+    }
+
+    public LivroModel gerenciarLivroPorIsbn(String isbn) {
+        LivroModel livro = buscarLivroPorIsbn(isbn);
+        return livro;
     }
 }

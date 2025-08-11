@@ -1,5 +1,6 @@
 package com.example.Biblioteca_digital.dtos;
 
+import com.example.Biblioteca_digital.models.LivroModel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -26,4 +27,12 @@ public class LivroDTO {
     @NotBlank(message = "O ISBN é obrigatório.")
     @Pattern(regexp = "\\d{13}", message = "O ISBN deve conter exatamente 13 dígitos numéricos.")
     private String isbn;
+
+    public LivroDTO(LivroModel livroModel) {
+        this.titulo = livroModel.getTitulo();
+        this.autor = livroModel.getAutor();
+        this.editora = livroModel.getEditora();
+        this.anoDePublicacao = livroModel.getAnoDePublicacao();
+        this.isbn = livroModel.getIsbn();
+    }
 }

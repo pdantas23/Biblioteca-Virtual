@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.lang.IllegalArgumentException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,5 +124,16 @@ public class GlobalExceptionHandler {
                 null
         );
         return new ResponseEntity<>(responseDTO, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseDTO<String>> handleIllegalArgument(IllegalArgumentException ex) {
+        ResponseDTO<String> response = new ResponseDTO<>(
+                LocalDateTime.now(),
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
