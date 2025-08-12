@@ -10,17 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class LivroStatusDTO {
     private LivroDTO livro;
-    private UserResponseDTO usuario;
 
     public LivroStatusDTO(LivroModel livroModel) {
         this.livro = new LivroDTO(livroModel);
-        if (livroModel.getUsuario() != null) {
-            this.usuario = new UserResponseDTO(
-                    livroModel.getUsuario().getId(),
-                    livroModel.getUsuario().getUsername(),
-                    livroModel.getUsuario().getEmail(),
-                    livroModel.getUsuario().getRole()
-            );
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.Biblioteca_digital.services;
 
+import com.example.Biblioteca_digital.dtos.ResultadoCadastroLivrosDTO;
 import com.example.Biblioteca_digital.exceptions.DuplicateResourceException;
 import com.example.Biblioteca_digital.exceptions.EventNotFoundException;
 import com.example.Biblioteca_digital.models.LivroModel;
@@ -11,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +81,6 @@ public class LivroService {
                 .orElseThrow(() -> new EventNotFoundException("Usuário não encontrado com ID: " + usuarioId));
 
         livro.setStatus(LivroStatus.ALUGADO);
-        livro.setUsuario(usuario);
 
         return livroRepository.save(livro);
     }
@@ -87,5 +88,24 @@ public class LivroService {
     public LivroModel gerenciarLivroPorIsbn(String isbn) {
         LivroModel livro = buscarLivroPorIsbn(isbn);
         return livro;
+    }
+
+    public ResultadoCadastroLivrosDTO salvarTodosComIgnorados(List<LivroModel> livros) {
+        List<LivroModel> livrosParaSalvar = new ArrayList<>();
+        List<LivroModel> livrosIgnorados = new ArrayList<>();
+
+        for (LivroModel livro : livros) {
+            Optional<LivroModel> existente = livroRepository.findByIsbn(livro.getIsbn());
+
+            if (existente.isEmpty()) {
+                livrosParaSalvar.add(livro);
+            } else {
+                livrosIgnorados.add(livro);
+            }
+        }
+
+        List<LivroModel> livrosSalvos = livroRepository.saveAll(livrosParaSalvar);
+
+        return new ResultadoCadastroLivrosDTO(livrosSalvos, livrosIgnorados);
     }
 }

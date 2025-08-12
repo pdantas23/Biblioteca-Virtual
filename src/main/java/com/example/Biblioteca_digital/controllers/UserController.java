@@ -24,6 +24,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("hasRole('GERENTE')")
     @PostMapping("/cadastro")
     public ResponseEntity<ResponseDTO<UserResponseDTO>> cadastrarUsuario(@RequestBody UserModel user) {
         userService.save(user);
@@ -40,6 +41,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @GetMapping("/{email}")
     public ResponseEntity<ResponseDTO<UserResponseDTO>> findByEmail(@PathVariable String email) {
        UserModel user = userService.findByEmail(email);

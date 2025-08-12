@@ -34,24 +34,7 @@ public class LivroController {
     private UserService userService;
 
 
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('GERENTE')")
-    @PostMapping("/alugar/{isbn}")
-    public ResponseEntity<ResponseDTO<LivroDTO>> alugarLivro(@PathVariable String isbn, @AuthenticationPrincipal CustomUserDetails user) {
-        LivroModel livro = livroService.alugarLivroPorIsbn(isbn, user.getId());
-        LivroDTO livroDTO = new LivroDTO(livro);
-
-        ResponseDTO<LivroDTO> responseDTO = new ResponseDTO<>(
-                LocalDateTime.now(),
-                livro.getTitulo() + " alugado por " + user.getUsername(),
-                HttpStatus.OK,
-                livroDTO
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-    }
-
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @GetMapping("/gerenciar/{isbn}")
     public ResponseEntity<ResponseDTO<LivroStatusDTO>> gerenciarLivro(@PathVariable String isbn, @AuthenticationPrincipal CustomUserDetails user) {
         LivroModel livro = livroService.gerenciarLivroPorIsbn(isbn);
@@ -68,24 +51,24 @@ public class LivroController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @PostMapping("/cadastro-livros")
-    public ResponseEntity<ResponseDTO<LivroModel>> cadastroLivro(@RequestBody @Valid LivroDTO livroDTO) {
-        LivroModel livro = new LivroModel();
-        BeanUtils.copyProperties(livroDTO, livro);
+    public ResponseEntity<ResponseDTO<ResultadoCadastroLivrosDTO>> cadastroLivros(@RequestBody @Valid List<LivroModel> livros) {
+        ResultadoCadastroLivrosDTO resultadoCadastroLivrosDTO = livroService.salvarTodosComIgnorados(livros);
+        String message = resultadoCadastroLivrosDTO.getLivrosIgnorados().isEmpty()
+                ? "Todos os livros foram cadastrados com sucesso!"
+                : "Alguns livros foram cadastrados, outros foram ignorados por já existirem.";
 
-        LivroModel salvo = livroService.salvarLivro(livro);
-
-        ResponseDTO<LivroModel> responseDTO = new ResponseDTO<>(
+        ResponseDTO<ResultadoCadastroLivrosDTO> responseDTO = new ResponseDTO<>(
                 LocalDateTime.now(),
-                "Livro criado com sucesso!",
+                message,
                 HttpStatus.CREATED,
-                salvo
+                resultadoCadastroLivrosDTO
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('GERENTE')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/exibir-livros")
     public ResponseEntity<ResponseDTO<List<LivroListagemDTO>>> exibirLivros() {
         List<LivroModel> livros = livroService.listarLivros();
@@ -117,7 +100,7 @@ public class LivroController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN') or hasRole('GERENTE')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{isbn}")
     public ResponseEntity<ResponseDTO<LivroModel>> buscarLivroPorIsbn(@PathVariable String isbn) {
         LivroModel livro = livroService.buscarLivroPorIsbn(isbn);
@@ -132,7 +115,7 @@ public class LivroController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('GERENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
     @DeleteMapping("/deletar/{isbn}")
     public ResponseEntity<ResponseDTO<?>> deletarLivroPorISBN(@PathVariable String isbn) {
         LivroModel livro = livroService.apagarLivroPorIsbn(isbn);

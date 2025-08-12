@@ -80,7 +80,4 @@ public class UserModel implements UserDetails {
         return true;
     }
 
-    @OneToMany(mappedBy = "usuario")
-    private List<LivroModel> livrosAlugados;
-
 }

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Table(name = "livros")
 public class LivroModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,14 +37,11 @@ public class LivroModel {
     private String anoDePublicacao;
 
     @NotNull
-    @Column(unique = false, nullable = false)
+    @Column(unique = true, nullable = false)
     private String isbn;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LivroStatus status = LivroStatus.DISPONIVEL;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private UserModel usuario;
 }
