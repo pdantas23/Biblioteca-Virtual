@@ -2,6 +2,7 @@ package com.example.Biblioteca_digital.controllers;
 
 import com.example.Biblioteca_digital.dtos.EmprestimoDTO;
 import com.example.Biblioteca_digital.dtos.ResponseDTO;
+import com.example.Biblioteca_digital.exceptions.DuplicateResourceException;
 import com.example.Biblioteca_digital.models.EmprestimoModel;
 import com.example.Biblioteca_digital.security.CustomUserDetails;
 import com.example.Biblioteca_digital.services.EmprestimoService;
@@ -28,6 +29,11 @@ public class EmprestimoController {
     @PostMapping("/alugar/{isbn}")
     public ResponseEntity<ResponseDTO<EmprestimoDTO>> alugarLivro(@PathVariable String isbn, @AuthenticationPrincipal CustomUserDetails user) {
         EmprestimoModel emprestimo = emprestimoService.registrarEmprestimo(isbn, user.getId());
+
+        if (emprestimo == null) {
+            throw new DuplicateResourceException("Livro indisponível no momento. Usuário foi adicionado à fila de espera.");
+        }
+
         EmprestimoDTO emprestimoDTO = new EmprestimoDTO(emprestimo);
 
         ResponseDTO<EmprestimoDTO> responseDTO = new ResponseDTO<>(
@@ -54,5 +60,18 @@ public class EmprestimoController {
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'GERENTE')")
+    @PostMapping("/fila/mover/{isbn}")
+    public ResponseEntity<ResponseDTO<EmprestimoModel>> moverFila(@PathVariable String isbn) {
+        EmprestimoModel emprestimo = emprestimoService.moverFila(isbn);
+
+        return ResponseEntity.ok(new ResponseDTO<>(
+                LocalDateTime.now(),
+                "Livro emprestado manualmente ao primeiro da fila.",
+                HttpStatus.OK,
+                emprestimo
+        ));
     }
 }

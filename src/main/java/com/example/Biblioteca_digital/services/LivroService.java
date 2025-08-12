@@ -25,15 +25,6 @@ public class LivroService {
     @Autowired
     private UserRepository userRepository;
 
-    public LivroModel salvarLivro(LivroModel livro){
-        Optional<LivroModel> livroExistente = livroRepository.findByIsbn(livro.getIsbn());
-
-        if(livroExistente.isPresent()){
-            throw new DuplicateResourceException("Livro com ISBN " + livro.getIsbn() + " já cadastrado.");
-        }
-
-        return livroRepository.save(livro);
-    }
 
     public List<LivroModel> listarLivros(){
 
@@ -67,22 +58,6 @@ public class LivroService {
         livroRepository.delete(livro);
 
         return livro;
-    }
-
-    public LivroModel alugarLivroPorIsbn(String isbn, Long usuarioId) {
-        LivroModel livro = livroRepository.findByIsbn(isbn)
-                .orElseThrow(() -> new EventNotFoundException("Livro não encontrado com ISBN: " + isbn));
-
-        if (livro.getStatus() == LivroStatus.ALUGADO) {
-            throw new DuplicateResourceException("Livro já está alugado");
-        }
-
-        UserModel usuario = userRepository.findById(usuarioId)
-                .orElseThrow(() -> new EventNotFoundException("Usuário não encontrado com ID: " + usuarioId));
-
-        livro.setStatus(LivroStatus.ALUGADO);
-
-        return livroRepository.save(livro);
     }
 
     public LivroModel gerenciarLivroPorIsbn(String isbn) {

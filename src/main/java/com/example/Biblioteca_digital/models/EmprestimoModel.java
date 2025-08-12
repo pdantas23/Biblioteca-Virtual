@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "emprestimos")
@@ -27,13 +28,14 @@ public class EmprestimoModel {
     @JoinColumn(name = "livro_id")
     private LivroModel livro;
 
-    private LocalDate dataEmprestimo;
-    private LocalDate dataDevolucao;
+    private LocalDateTime dataEmprestimo;
+    private LocalDateTime dataDevolucao;
 
     @Enumerated(EnumType.STRING)
     private EmprestimoStatus status;
 
-    public EmprestimoModel(LivroModel livro, UserModel usuario, LocalDate dataEmprestimo, EmprestimoStatus status) {
+
+    public EmprestimoModel(LivroModel livro, UserModel usuario, LocalDateTime dataEmprestimo, EmprestimoStatus status) {
         this.livro = livro;
         this.user = usuario;
         this.dataEmprestimo = dataEmprestimo;

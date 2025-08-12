@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,8 +15,8 @@ public class EmprestimoDTO {
     private String titulo;
     private String autor;
     private String anoDePublicacao;
-    private LocalDate dataEmprestimo;
-    private LocalDate dataDevolucao;
+    private LocalDateTime dataEmprestimo;
+    private LocalDateTime dataDevolucao;
 
     public EmprestimoDTO(EmprestimoModel emprestimo) {
         this.titulo = emprestimo.getLivro().getTitulo();
